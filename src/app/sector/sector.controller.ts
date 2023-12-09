@@ -1,7 +1,7 @@
 import { SectorQueryDto } from './dto/sector-query.dto';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Res, UseGuards, Query } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guard/auth.guard';
 import { RoleGuard } from '../auth/guard/role.guard';
 import { SectorService } from './sector.service';
@@ -10,6 +10,7 @@ import { UpdateSectorDto } from './dto/update-sector.dto';
 import { ResponseDTO } from 'src/utils/types';
 import { ErrorResponse, JsonResponse } from 'src/handlers/responses';
 import { Roles } from 'src/decorators/roles.decorator';
+import { ObjectId } from 'mongodb';
 
 @ApiTags('Sector')
 @Controller('api/v1/sectors')
@@ -36,9 +37,9 @@ export class SectorController {
 
   @ApiOperation({ summary: 'Get all sectors' })
   @Get()
-  async getSectors(@Res() res: Response): Promise<ResponseDTO> {
+  async getSectors(@Query() query: SectorQueryDto, @Res() res: Response): Promise<ResponseDTO> {
     try {
-      const response = await this.sectorService.findAll();
+      const response = await this.sectorService.getSectors(query);
 
       return JsonResponse(res, response);
     } catch (error) {
@@ -55,9 +56,7 @@ export class SectorController {
   @Get('sub')
   async getSubSectors(@Query() query: SectorQueryDto, @Res() res: Response): Promise<ResponseDTO> {
     try {
-      const filter = requestFilter(query);
-
-      const response = await this.sectorService.getSubSectors(filter);
+      const response = await this.sectorService.getSubSectors(query);
 
       return JsonResponse(res, response);
     } catch (error) {
@@ -74,7 +73,45 @@ export class SectorController {
   @Get('parent-sub')
   async getSectorsWithSubs(@Query() query: SectorQueryDto, @Res() res: Response): Promise<ResponseDTO> {
     try {
-      const response = await this.sectorService.getSectorsWithSubs(SectorQueryDto);
+      const response = await this.sectorService.getSectorsWithSubs(query);
+
+      return JsonResponse(res, response);
+    } catch (error) {
+      return ErrorResponse(res, error);
+    }
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Admin update sector',
+    description: 'Allows admin update a sector',
+  })
+  @UseGuards(JwtAuthGuard)
+  @Patch('/:id')
+  async updateSector(
+    @Param() id: string,
+    @Body() updateSectorPayload: UpdateSectorDto,
+    @Res() res: Response,
+  ): Promise<ResponseDTO> {
+    try {
+      const response = await this.sectorService.updateSector(id, updateSectorPayload);
+
+      return JsonResponse(res, response);
+    } catch (error) {
+      return ErrorResponse(res, error);
+    }
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Admin delete sector',
+    description: 'Allows admin delete a sector',
+  })
+  @UseGuards(JwtAuthGuard)
+  @Delete('/:id')
+  async deleteSector(@Param('id') id: ObjectId, @Res() res: Response): Promise<ResponseDTO> {
+    try {
+      const response = await this.sectorService.deleteSector(id);
 
       return JsonResponse(res, response);
     } catch (error) {

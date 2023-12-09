@@ -13,7 +13,6 @@ async function bootstrap() {
     .setTitle('User Sector documentation')
     .setDescription('User Sector API documentation')
     .setVersion('1.0')
-    .addTag('Task')
     .addBearerAuth()
     .build();
 

@@ -1,5 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsMongoId, IsNotEmpty } from 'class-validator';
+import { ObjectId } from 'mongodb';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
+import { IsString, IsMongoId, IsNotEmpty, IsBoolean } from 'class-validator';
 
 export class CreateUserSectorDto {
   @ApiProperty({ description: 'The name of the model', example: 'Example Name' })
@@ -11,4 +12,12 @@ export class CreateUserSectorDto {
   @IsMongoId({ message: 'Sector must be a valid MongoDB ObjectId' })
   @IsNotEmpty()
   readonly sector: string;
+
+  @ApiProperty({ example: true })
+  @IsBoolean()
+  @IsNotEmpty()
+  readonly agreedTerms: boolean;
+
+  @ApiHideProperty()
+  readonly user?: ObjectId;
 }

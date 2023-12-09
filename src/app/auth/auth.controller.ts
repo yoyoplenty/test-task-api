@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { ApiOperation } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Controller, Post, Body, Patch, Param, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -7,7 +7,8 @@ import { ResponseDTO } from 'src/utils/types';
 import { ErrorResponse, JsonResponse } from 'src/handlers/responses';
 import { SignInDto } from './dto/sign-in.dto';
 
-@Controller('auth')
+@ApiTags('Auth')
+@Controller('api/v1/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

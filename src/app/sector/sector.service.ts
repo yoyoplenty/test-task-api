@@ -1,31 +1,100 @@
 import { Model } from 'mongoose';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { CreateSectorDto } from './dto/create-sector.dto';
 import { UpdateSectorDto } from './dto/update-sector.dto';
 import { Sector, SectorDocument } from './schemas/sector.schema';
+import { ObjectId } from 'mongodb';
+import { MSG_TYPES } from 'src/utils/helpers/msg-types';
+import { ServiceResponse } from 'src/utils/types';
+import { SectorQueryDto } from './dto/sector-query.dto';
 
 @Injectable()
 export class SectorService {
   constructor(@InjectModel(Sector.name) private sector: Model<SectorDocument>) {}
 
-  create(createSectorDto: CreateSectorDto) {
-    return 'This action adds a new sector';
+  async createSector(createSectorPayload: CreateSectorDto): Promise<ServiceResponse> {
+    const { parentSector = null, name } = createSectorPayload;
+
+    const validParentSector = parentSector ? await this.sector.findOne({ __id: parentSector }) : null;
+    if (parentSector && !validParentSector) throw new BadRequestException('invalid parent sector');
+
+    const sector = await this.sector.findOne({ name, parentSector });
+    if (sector) throw new ConflictException('sector name already in use');
+
+    const data = await this.sector.create(createSectorPayload);
+
+    return { data, message: MSG_TYPES.FETCHED };
   }
 
-  findAll() {
-    return `This action returns all sector`;
+  async getSectors(query: SectorQueryDto): Promise<ServiceResponse> {
+    const sectors = await this.sector.find(query);
+    if (!sectors || sectors.length < 1) throw new NotFoundException('sectors not found');
+
+    return { data: sectors, message: MSG_TYPES.FETCHED };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} sector`;
+  async getSubSectors(query: SectorQueryDto): Promise<ServiceResponse> {
+    const { parentSector = null } = query;
+
+    delete query.parentSector;
+
+    const filter = parentSector ? { parentSector } : { parentSector: { $exists: true, $ne: null } };
+
+    const sectors = await this.sector.find({ ...query, ...filter });
+    if (!sectors || sectors.length < 1) throw new NotFoundException('sectors not found');
+
+    return { data: sectors, message: MSG_TYPES.FETCHED };
   }
 
-  update(id: number, updateSectorDto: UpdateSectorDto) {
-    return `This action updates a #${id} sector`;
+  async getSectorsWithSubs(query: SectorQueryDto): Promise<ServiceResponse> {
+    const parentSectors = await this.sector.find({ parentSector: null, ...query });
+    if (!parentSectors || parentSectors.length < 1) throw new NotFoundException('sectors not found');
+
+    const data = {
+      Sectors: await Promise.all(
+        parentSectors.map(async (sector) => {
+          const subSector = await this.sector.find({ parentSector: sector.id });
+
+          return { ...sector.toJSON(), subSector };
+        }),
+      ),
+    };
+
+    return { data, message: MSG_TYPES.FETCHED };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} sector`;
+  async getSectorById(sectorId: ObjectId): Promise<ServiceResponse> {
+    const sector = await this.sector.findById(sectorId);
+    if (!sector) throw new NotFoundException('sector not found');
+
+    return { data: sector, message: MSG_TYPES.FETCHED };
+  }
+
+  async getSector(query: SectorQueryDto): Promise<ServiceResponse> {
+    const sector = await this.sector.findOne(query);
+    if (!sector) throw new NotFoundException('sector not found');
+
+    return { data: sector, message: MSG_TYPES.FETCHED };
+  }
+
+  async updateSector(sectorId: string, updateSectorPayload: UpdateSectorDto): Promise<ServiceResponse> {
+    const sector = await this.sector.findOne({ _id: sectorId });
+    if (!sector) throw new NotFoundException('sector not found');
+
+    await this.sector.updateOne({ _id: sector._id }, updateSectorPayload);
+
+    return { data: null, message: MSG_TYPES.UPDATED };
+  }
+
+  async deleteSector(sectorId: ObjectId): Promise<ServiceResponse> {
+    const sector = await this.sector.findById(sectorId);
+    if (!sector) throw new NotFoundException('sector not found');
+
+    if (!sector.parentSector) await this.sector.deleteMany({ parentSector: sector._id });
+
+    await this.sector.findByIdAndDelete(sector._id);
+
+    return { data: null, message: MSG_TYPES.UPDATED };
   }
 }
