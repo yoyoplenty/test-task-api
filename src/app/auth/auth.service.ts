@@ -13,7 +13,6 @@ import { MSG_TYPES } from 'src/utils/helpers/msg-types';
 import { signupEmail } from 'src/services/email/templates/sign-up.template';
 import sendEmail from 'src/services/email';
 import { ServiceResponse } from 'src/utils/types';
-import { User } from '../user/schemas/user.schema';
 import { SignInDto } from './dto/sign-in.dto';
 
 const host = appConfig.app.verificationBaseUrl;
@@ -48,7 +47,7 @@ export class AuthService {
     };
   }
 
-  async register(registerPayload: RegisterDto): Promise<User> {
+  async register(registerPayload: RegisterDto): Promise<ServiceResponse> {
     const { email } = registerPayload;
 
     const userExists = await this.user.findOne({ email });
@@ -57,9 +56,9 @@ export class AuthService {
     registerPayload.password = await hashResource(registerPayload.password);
 
     const user = await this.user.create(registerPayload);
-    await this.sendVerificationEmail(user._id);
+    const data = await this.sendVerificationEmail(user._id);
 
-    return user;
+    return data;
   }
 
   async signIn(signInPayload: SignInDto): Promise<ServiceResponse> {
@@ -86,7 +85,8 @@ export class AuthService {
 
     const userToken = await this.token.findOne({ token });
     if (!userToken) throw new BadRequestException('invalid token');
-    if (userToken.userId !== String(user._id)) throw new BadRequestException('invalid user token');
+
+    if (String(userToken.userId) !== String(user._id)) throw new BadRequestException('invalid user token');
 
     await user.updateOne({ verified: true });
     await userToken.updateOne({ isActive: false });
