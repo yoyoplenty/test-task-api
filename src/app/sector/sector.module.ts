@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
 import { SectorService } from './sector.service';
 import { SectorController } from './sector.controller';
-import { MongooseModule } from '@nestjs/mongoose';
 import { Sector, SectorSchema } from './schemas/sector.schema';
 
 @Module({
