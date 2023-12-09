@@ -14,6 +14,14 @@ export class UserSector {
   @ApiProperty()
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Sector', required: true })
   sector: mongoose.Schema.Types.ObjectId;
+
+  @ApiProperty()
+  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true })
+  user: mongoose.Schema.Types.ObjectId;
+
+  @ApiProperty()
+  @Prop({ type: Boolean, required: true })
+  agreedTerms: boolean;
 }
 
 export const UserSectorSchema = SchemaFactory.createForClass(UserSector);
