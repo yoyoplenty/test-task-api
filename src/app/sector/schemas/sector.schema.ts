@@ -5,7 +5,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export type SectorDocument = HydratedDocument<Sector>;
 
-@Schema({ collection: 'Sectors', versionKey: false, timestamps: true })
+@Schema({ collection: 'sectors', versionKey: false, timestamps: true })
 export class Sector {
   @ApiProperty()
   @Prop({ type: String, required: true })
