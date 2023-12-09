@@ -19,5 +19,5 @@ export class CreateUserSectorDto {
   readonly agreedTerms: boolean;
 
   @ApiHideProperty()
-  readonly user?: ObjectId;
+  user?: ObjectId;
 }

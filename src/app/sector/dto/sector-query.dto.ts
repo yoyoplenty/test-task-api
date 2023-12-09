@@ -2,12 +2,12 @@ import { ObjectId } from 'mongodb';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class SectorQueryDto {
-  @ApiPropertyOptional({ description: 'The category id' })
+  @ApiPropertyOptional({ description: 'The sector id' })
   _id?: number;
 
-  @ApiPropertyOptional({ description: 'The category name' })
+  @ApiPropertyOptional({ description: 'The sector name' })
   name?: string;
 
-  @ApiPropertyOptional({ description: 'The category sector id' })
+  @ApiPropertyOptional({ description: 'The sector sector id' })
   parentSector?: ObjectId;
 }

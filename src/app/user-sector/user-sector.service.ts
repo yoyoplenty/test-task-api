@@ -1,17 +1,25 @@
 import { Model } from 'mongoose';
+import { ObjectId } from 'mongodb';
 import { InjectModel } from '@nestjs/mongoose';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserSectorDto } from './dto/create-user-sector.dto';
 import { UpdateUserSectorDto } from './dto/update-user-sector.dto';
 import { ServiceResponse } from 'src/utils/types';
 import { MSG_TYPES } from 'src/utils/helpers/msg-types';
 import { UserSector, UserSectorDocument } from './schemas/user-sector.schema';
+import { UserDocument } from '../user/schemas/user.schema';
 
 @Injectable()
 export class UserSectorService {
   constructor(@InjectModel(UserSector.name) private userSector: Model<UserSectorDocument>) {}
 
-  async createUserSector(createUserSectorPayload: CreateUserSectorDto): Promise<ServiceResponse> {
+  async createUserSector(user: UserDocument, createUserSectorPayload: CreateUserSectorDto): Promise<ServiceResponse> {
+    const { name, sector } = createUserSectorPayload;
+    createUserSectorPayload.user = user._id;
+
+    const userSectorExists = await this.userSector.findOne({ name, sector: new ObjectId(sector) });
+    if (userSectorExists) throw new ConflictException('userSectors already exists');
+
     const data = await this.userSector.create(createUserSectorPayload);
 
     return { data, message: MSG_TYPES.FETCHED };

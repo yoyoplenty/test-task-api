@@ -42,7 +42,7 @@ export function contactUsMessage(message: Record<string, any>) {
 		  display: none !important;
 		}
 		table[class="body"] .stats-labels .label,
-		table[class="body"] .category-labels .label {
+		table[class="body"] .sector-labels .label {
 		  font-size: 10px !important;
 		}
 		table[class="body"] .credits table {
@@ -389,7 +389,7 @@ export function contactUsMessage(message: Record<string, any>) {
 									font-weight: 300;
 								  "
 								>
-								  <b>CATEGORY:</b> ${message.category}
+								  <b>CATEGORY:</b> ${message.sector}
 								</h3>
   
 								<h3

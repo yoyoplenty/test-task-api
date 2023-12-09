@@ -24,10 +24,11 @@ export class UserSectorController {
   @Post()
   async createUserSector(
     @Body() createUserSectorPayload: CreateUserSectorDto,
+    @User() user,
     @Res() res: Response,
   ): Promise<ResponseDTO> {
     try {
-      const response = await this.userSectorService.createUserSector(createUserSectorPayload);
+      const response = await this.userSectorService.createUserSector(user, createUserSectorPayload);
 
       return JsonResponse(res, response);
     } catch (error) {

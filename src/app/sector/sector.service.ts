@@ -16,7 +16,7 @@ export class SectorService {
   async createSector(createSectorPayload: CreateSectorDto): Promise<ServiceResponse> {
     const { parentSector = null, name } = createSectorPayload;
 
-    const validParentSector = parentSector ? await this.sector.findOne({ __id: parentSector }) : null;
+    const validParentSector = parentSector ? await this.sector.findOne({ _id: parentSector }) : null;
     if (parentSector && !validParentSector) throw new BadRequestException('invalid parent sector');
 
     const sector = await this.sector.findOne({ name, parentSector });
@@ -34,15 +34,12 @@ export class SectorService {
     return { data: sectors, message: MSG_TYPES.FETCHED };
   }
 
-  async getSubSectors(query: SectorQueryDto): Promise<ServiceResponse> {
+  async getAllSubSectors(query: SectorQueryDto): Promise<ServiceResponse> {
     const { parentSector = null } = query;
-
     delete query.parentSector;
 
     const filter = parentSector ? { parentSector } : { parentSector: { $exists: true, $ne: null } };
-
     const sectors = await this.sector.find({ ...query, ...filter });
-    if (!sectors || sectors.length < 1) throw new NotFoundException('sectors not found');
 
     return { data: sectors, message: MSG_TYPES.FETCHED };
   }
@@ -54,14 +51,35 @@ export class SectorService {
     const data = {
       Sectors: await Promise.all(
         parentSectors.map(async (sector) => {
-          const subSector = await this.sector.find({ parentSector: sector.id });
+          const subSectors = await this.getSubSectors({ parentSector: sector._id });
 
-          return { ...sector.toJSON(), subSector };
+          return { ...sector.toJSON(), subSectors };
         }),
       ),
     };
 
     return { data, message: MSG_TYPES.FETCHED };
+  }
+
+  async getSubSectors(query: SectorQueryDto): Promise<any[]> {
+    const { parentSector = null } = query;
+    delete query.parentSector;
+
+    const filter = parentSector ? { parentSector } : { parentSector: { $exists: true, $ne: null } };
+    const subSectors = await this.sector.find({ ...query, ...filter });
+
+    if (subSectors.length > 0) {
+      const nestedSubSectors = await Promise.all(
+        subSectors.map(async (subSector) => {
+          const subSubSectors = await this.getSubSectors({ parentSector: subSector._id });
+
+          return { ...subSector.toJSON(), subSectors: subSubSectors };
+        }),
+      );
+      return nestedSubSectors;
+    }
+
+    return [];
   }
 
   async getSectorById(sectorId: ObjectId): Promise<ServiceResponse> {
@@ -78,7 +96,7 @@ export class SectorService {
     return { data: sector, message: MSG_TYPES.FETCHED };
   }
 
-  async updateSector(sectorId: string, updateSectorPayload: UpdateSectorDto): Promise<ServiceResponse> {
+  async updateSector(sectorId: ObjectId, updateSectorPayload: UpdateSectorDto): Promise<ServiceResponse> {
     const sector = await this.sector.findOne({ _id: sectorId });
     if (!sector) throw new NotFoundException('sector not found');
 

@@ -56,7 +56,7 @@ export class SectorController {
   @Get('sub')
   async getSubSectors(@Query() query: SectorQueryDto, @Res() res: Response): Promise<ResponseDTO> {
     try {
-      const response = await this.sectorService.getSubSectors(query);
+      const response = await this.sectorService.getAllSubSectors(query);
 
       return JsonResponse(res, response);
     } catch (error) {
@@ -89,12 +89,12 @@ export class SectorController {
   @UseGuards(JwtAuthGuard)
   @Patch('/:id')
   async updateSector(
-    @Param() id: string,
+    @Param('id') id: string,
     @Body() updateSectorPayload: UpdateSectorDto,
     @Res() res: Response,
   ): Promise<ResponseDTO> {
     try {
-      const response = await this.sectorService.updateSector(id, updateSectorPayload);
+      const response = await this.sectorService.updateSector(new ObjectId(id), updateSectorPayload);
 
       return JsonResponse(res, response);
     } catch (error) {
@@ -109,9 +109,9 @@ export class SectorController {
   })
   @UseGuards(JwtAuthGuard)
   @Delete('/:id')
-  async deleteSector(@Param('id') id: ObjectId, @Res() res: Response): Promise<ResponseDTO> {
+  async deleteSector(@Param('id') id: string, @Res() res: Response): Promise<ResponseDTO> {
     try {
-      const response = await this.sectorService.deleteSector(id);
+      const response = await this.sectorService.deleteSector(new ObjectId(id));
 
       return JsonResponse(res, response);
     } catch (error) {
