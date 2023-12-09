@@ -34,6 +34,12 @@ export class SectorService {
     return { data: sectors, message: MSG_TYPES.FETCHED };
   }
 
+  async getParentSectors(): Promise<ServiceResponse> {
+    const sectors = await this.sector.find({ parentSector: { $exists: false, $eq: null } });
+
+    return { data: sectors, message: MSG_TYPES.FETCHED };
+  }
+
   async getAllSubSectors(query: SectorQueryDto): Promise<ServiceResponse> {
     const { parentSector = null } = query;
     delete query.parentSector;
@@ -61,7 +67,7 @@ export class SectorService {
     return { data, message: MSG_TYPES.FETCHED };
   }
 
-  async getSubSectors(query: SectorQueryDto): Promise<any[]> {
+  async getSubSectors(query: SectorQueryDto | Record<string, any>): Promise<any[]> {
     const { parentSector = null } = query;
     delete query.parentSector;
 
@@ -71,7 +77,7 @@ export class SectorService {
     if (subSectors.length > 0) {
       const nestedSubSectors = await Promise.all(
         subSectors.map(async (subSector) => {
-          const subSubSectors = await this.getSubSectors({ parentSector: subSector._id });
+          const subSubSectors = await this.getSubSectors({ parentSector: new ObjectId(subSector._id) });
 
           return { ...subSector.toJSON(), subSectors: subSubSectors };
         }),

@@ -49,6 +49,23 @@ export class SectorController {
 
   @ApiBearerAuth()
   @ApiOperation({
+    summary: 'Users Gets all parent sectors',
+    description: 'Allows users get all parent sectors',
+  })
+  @UseGuards(JwtAuthGuard)
+  @Get('parent')
+  async getParentSectors(@Res() res: Response): Promise<ResponseDTO> {
+    try {
+      const response = await this.sectorService.getParentSectors();
+
+      return JsonResponse(res, response);
+    } catch (error) {
+      return ErrorResponse(res, error);
+    }
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({
     summary: 'Users Gets all sub sectors',
     description: 'Allows users get all sub sectors',
   })

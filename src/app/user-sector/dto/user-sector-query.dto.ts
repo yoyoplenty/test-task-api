@@ -3,7 +3,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UserSectorQueryDto {
   @ApiPropertyOptional({ description: 'The sector id' })
-  _id?: number;
+  _id?: string;
 
   @ApiPropertyOptional({ description: 'The sector id' })
   sector?: ObjectId;
