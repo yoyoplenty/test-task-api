@@ -20,7 +20,7 @@ export class UserSectorController {
     summary: 'User creates its sector',
     description: 'Allows user creates its sector',
   })
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Post()
   async createUserSector(
     @Body() createUserSectorPayload: CreateUserSectorDto,
