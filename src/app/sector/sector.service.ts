@@ -51,18 +51,16 @@ export class SectorService {
   }
 
   async getSectorsWithSubs(query: SectorQueryDto): Promise<ServiceResponse> {
-    const parentSectors = await this.sector.find(query);
+    const parentSectors = await this.sector.find({ ...query, parentSector: { $exists: true, $ne: null } });
     if (!parentSectors || parentSectors.length < 1) throw new NotFoundException('sectors not found');
 
-    const data = {
-      Sectors: await Promise.all(
-        parentSectors.map(async (sector) => {
-          const subSectors = await this.getSubSectors({ parentSector: sector._id });
+    const data = await Promise.all(
+      parentSectors.map(async (sector) => {
+        const subSectors = await this.getSubSectors({ parentSector: sector._id });
 
-          return { ...sector.toJSON(), subSectors };
-        }),
-      ),
-    };
+        return { ...sector.toJSON(), subSectors };
+      }),
+    );
 
     return { data, message: MSG_TYPES.FETCHED };
   }
