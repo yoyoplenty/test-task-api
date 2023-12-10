@@ -51,7 +51,7 @@ export class SectorService {
   }
 
   async getSectorsWithSubs(query: SectorQueryDto): Promise<ServiceResponse> {
-    const parentSectors = await this.sector.find({ parentSector: null, ...query });
+    const parentSectors = await this.sector.find(query);
     if (!parentSectors || parentSectors.length < 1) throw new NotFoundException('sectors not found');
 
     const data = {
