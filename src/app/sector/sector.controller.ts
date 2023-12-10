@@ -22,8 +22,8 @@ export class SectorController {
     summary: 'Admin create sector',
     description: 'Allows admin create a new sector',
   })
-  // @Roles('admin')
-  // @UseGuards(JwtAuthGuard, RoleGuard)
+  @Roles('admin')
+  @UseGuards(JwtAuthGuard, RoleGuard)
   @Post()
   async createSector(@Body() createSectorPayload: CreateSectorDto, @Res() res: Response): Promise<ResponseDTO> {
     try {
@@ -52,7 +52,7 @@ export class SectorController {
     summary: 'Users Gets all parent sectors',
     description: 'Allows users get all parent sectors',
   })
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('parent')
   async getParentSectors(@Res() res: Response): Promise<ResponseDTO> {
     try {
@@ -69,7 +69,7 @@ export class SectorController {
     summary: 'Users Gets all sub sectors',
     description: 'Allows users get all sub sectors',
   })
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('sub')
   async getSubSectors(@Query() query: SectorQueryDto, @Res() res: Response): Promise<ResponseDTO> {
     try {
@@ -86,7 +86,7 @@ export class SectorController {
     summary: 'Gets sectors with the sub sectors',
     description: 'Allows users get sectors with their sub sectors',
   })
-  // @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('parent-sub')
   async getSectorsWithSubs(@Query() query: SectorQueryDto, @Res() res: Response): Promise<ResponseDTO> {
     try {
