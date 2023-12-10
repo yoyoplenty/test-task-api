@@ -22,8 +22,8 @@ export class SectorController {
     summary: 'Admin create sector',
     description: 'Allows admin create a new sector',
   })
-  @Roles('admin')
-  @UseGuards(JwtAuthGuard, RoleGuard)
+  // @Roles('admin')
+  // @UseGuards(JwtAuthGuard, RoleGuard)
   @Post()
   async createSector(@Body() createSectorPayload: CreateSectorDto, @Res() res: Response): Promise<ResponseDTO> {
     try {
