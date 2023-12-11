@@ -26,7 +26,7 @@ export class UserSectorService {
   }
 
   async getUserSectors(filter: any): Promise<ServiceResponse> {
-    const userSectors = await this.userSector.find(filter);
+    const userSectors = await this.userSector.find(filter).populate('sector');
     if (!userSectors || userSectors.length < 1) throw new NotFoundException('userSectors not found');
 
     return { data: userSectors, message: MSG_TYPES.FETCHED };
