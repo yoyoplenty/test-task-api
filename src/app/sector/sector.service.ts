@@ -50,6 +50,23 @@ export class SectorService {
     return { data: sectors, message: MSG_TYPES.FETCHED };
   }
 
+  async getParentSectorsWithSubs(query: SectorQueryDto): Promise<ServiceResponse> {
+    delete query.parentSector;
+
+    const parentSectors = await this.sector.find({ ...query, parentSector: { $exists: false, $eq: null } });
+    if (!parentSectors || parentSectors.length < 1) throw new NotFoundException('sectors not found');
+
+    const data = await Promise.all(
+      parentSectors.map(async (sector) => {
+        const subSectors = await this.getSubSectors({ parentSector: sector._id });
+
+        return { ...sector.toJSON(), subSectors };
+      }),
+    );
+
+    return { data, message: MSG_TYPES.FETCHED };
+  }
+
   async getSectorsWithSubs(query: SectorQueryDto): Promise<ServiceResponse> {
     delete query.parentSector;
 

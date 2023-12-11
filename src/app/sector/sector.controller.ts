@@ -100,6 +100,23 @@ export class SectorController {
 
   @ApiBearerAuth()
   @ApiOperation({
+    summary: 'Gets parent sectors with the sub sectors',
+    description: 'Allows users get parent sectors with their sub sectors',
+  })
+  @UseGuards(JwtAuthGuard)
+  @Get('parent-with-sub')
+  async getParentSectorsWithSubs(@Query() query: SectorQueryDto, @Res() res: Response): Promise<ResponseDTO> {
+    try {
+      const response = await this.sectorService.getParentSectorsWithSubs(query);
+
+      return JsonResponse(res, response);
+    } catch (error) {
+      return ErrorResponse(res, error);
+    }
+  }
+
+  @ApiBearerAuth()
+  @ApiOperation({
     summary: 'Admin update sector',
     description: 'Allows admin update a sector',
   })
